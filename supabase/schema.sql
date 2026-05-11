@@ -48,8 +48,12 @@ create table if not exists public.quote_requests (
   finishing text,
   message text,
   status text not null default 'new',
+  admin_notes text,
+  contacted_at timestamptz,
   created_at timestamptz not null default timezone('utc', now()),
-  updated_at timestamptz not null default timezone('utc', now())
+  updated_at timestamptz not null default timezone('utc', now()),
+  constraint quote_requests_status_check
+    check (status in ('new', 'contacted', 'quoted', 'closed', 'archived'))
 );
 
 create index if not exists categories_active_sort_idx
@@ -99,7 +103,20 @@ create policy "Public insert quote requests"
   on public.quote_requests
   for insert
   to anon, authenticated
-  with check (true);
+  with check (
+    length(btrim(full_name)) >= 1
+    and length(btrim(email)) >= 3
+    and btrim(email) ~ '^[^@\s]+@[^@\s]+\.[^@\s]+$'
+    and length(btrim(product_type)) >= 1
+    and quantity > 0
+    and (
+      message is null
+      or length(btrim(message)) >= 1
+    )
+    and status = 'new'
+    and admin_notes is null
+    and contacted_at is null
+  );
 
--- Optional: run supabase/rls_quote_requests_insert_hardening.sql to replace the permissive
--- insert policy with basic field validation aligned to the public quote form.
+-- For existing projects, run supabase/migrations/20260510_add_quote_request_admin_fields.sql
+-- to add admin fields and align the public insert policy with the current schema.

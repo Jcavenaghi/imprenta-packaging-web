@@ -91,6 +91,8 @@ export type Database = {
           finishing: string | null;
           message: string | null;
           status: string;
+          admin_notes: string | null;
+          contacted_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -107,6 +109,8 @@ export type Database = {
           finishing?: string | null;
           message?: string | null;
           status?: string;
+          admin_notes?: string | null;
+          contacted_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -123,6 +127,8 @@ export type Database = {
           finishing?: string | null;
           message?: string | null;
           status?: string;
+          admin_notes?: string | null;
+          contacted_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };

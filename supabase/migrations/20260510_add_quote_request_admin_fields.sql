@@ -1,6 +1,13 @@
--- Optional: tighten public INSERT on quote_requests (run after schema.sql on existing projects).
--- Replaces permissive with_check(true) with basic field checks aligned to the landing form.
--- Does not grant SELECT to anon/authenticated (quotes stay private).
+alter table public.quote_requests
+  add column if not exists admin_notes text,
+  add column if not exists contacted_at timestamptz;
+
+alter table public.quote_requests
+  drop constraint if exists quote_requests_status_check;
+
+alter table public.quote_requests
+  add constraint quote_requests_status_check
+  check (status in ('new', 'contacted', 'quoted', 'closed', 'archived'));
 
 drop policy if exists "Public insert quote requests" on public.quote_requests;
 
