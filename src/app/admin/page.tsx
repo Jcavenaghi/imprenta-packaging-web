@@ -6,9 +6,8 @@ import { getAdminSessionUsername } from "@/lib/admin/auth";
  * management page. Otherwise the layout will display the login form.
  */
 export default async function AdminRootPage() {
-  // If no session, requireAdminSession will throw which is fine — the
-  // layout will handle displaying the login form. If authenticated,
-  // we redirect to the products list as the default admin view.
+  // With a valid session, redirect to the default admin products view.
+  // Without one, the admin layout renders the login form for this route.
   const username = await getAdminSessionUsername();
   if (username) {
     redirect("/admin/products");

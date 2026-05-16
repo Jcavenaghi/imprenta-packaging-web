@@ -64,9 +64,9 @@ function timingSafeEqual(a: string, b: string): boolean {
 /**
  * Create a signed session token for the admin user.
  *
- * The token format is `${username}|${signature}` where signature is an HMAC-SHA256
- * of the username using ADMIN_SESSION_SECRET. We encode the signature in hex
- * to simplify comparisons.
+ * The token format is `${username}|${issuedAt}|${signature}` where signature
+ * is an HMAC-SHA256 of `${username}|${issuedAt}` using ADMIN_SESSION_SECRET.
+ * We encode the signature in hex to simplify comparisons.
  */
 export function createSessionToken(
   username: string,
@@ -137,7 +137,15 @@ export async function setAdminSessionCookie(token: string) {
  */
 export async function clearAdminSessionCookie() {
   const cookieStore = await cookies();
-  cookieStore.delete(COOKIE_NAME);
+  cookieStore.set({
+    name: COOKIE_NAME,
+    value: "",
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    sameSite: "lax",
+    maxAge: 0,
+  });
 }
 
 /**
@@ -159,7 +167,7 @@ export async function getAdminSessionUsername(): Promise<string | null> {
 /**
  * Require admin session in server components or actions.
  *
- * Throws if session is invalid or missing.
+ * Redirects to `/admin` if the session is invalid or missing.
  */
 export async function requireAdminSession(): Promise<string> {
   const username = await getAdminSessionUsername();
